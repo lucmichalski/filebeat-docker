@@ -1,6 +1,6 @@
 version: "3"
 services:
-      filebeat:
+  filebeat:
       image: registry.cn-shenzhen.aliyuncs.com/thinks/beats:filebeat
       user: root
       volumes:
