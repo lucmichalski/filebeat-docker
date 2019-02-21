@@ -1,0 +1,17 @@
+filebeat.prospectors:
+- input_type: log
+  paths:
+    - /var/log/nginx/*.log
+  tags: ["nginx-accesslog"]
+  document_type: nginxaccess
+#output.kafka:
+#   enabled: true
+#   hosts: ["192.168.31.163:9092"]
+# #  topic: logstash-%{[type]}
+#   topic: backstage_%{[type]}
+output:
+  logstash:
+    hosts: ["192.168.31.111:5000"]
+#    worker: 1
+#    loadbalance: true
+#    index: filebeat
