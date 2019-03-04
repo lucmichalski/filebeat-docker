@@ -5,17 +5,17 @@ services:
       user: root
       volumes:
         #Mount the filebeat configuration so users can make edit
-        - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+        - ${FILEBEAT_PATH}:/usr/share/filebeat/filebeat.yml
         #Mount the nginx logs into the filebeat container so we can access and index them using the filebeat nginx module
-        - /data/wwwlogs:/var/log/nginx/
+        - ${NGINX_HOST_LOG_PATH}:/var/log/nginx/
         #Mount the php-fpm logs into the filebeat container so we can access and index them using the filebeat php-fpm module
-        - /usr/local/php7/var/log/:/var/log/php-fpm/
+        - ${PHP_HOST_LOG_PATH}:/var/log/php-fpm/
         #Mount the laravel logs into the filebeat container so we can access and and index them using the filebeat laravel module
-        - /data/laravel/:/var/log/laravel/
+        - ${LARAVEL_HOST_LOG_PATH}:/var/log/laravel/
         #Mount the mysql logs into the filebeat container so we can access and and index them using the filebeat mysql module
-        - /data/mysql/:/var/log/mysql/
+        - ${MYSQL_HOST_LOG_PATH}:/var/log/mysql/
         #Mount the hosts system log directory. This represents the logs of the VM hosting docker. Consumed by the filebeat system module.
-        - /var/log/:/var/log/host/:ro
+        - ${SYSTEM_HOST_LOG_PATH}:/var/log/host/:ro
         #Mount the docker logs for indexing by the custom prospector ./config/filebeat/prospectors.d
         - /var/lib/docker/containers:/hostfs/var/lib/docker/containers
         #Named volume fsdata. This is used to persist the registry file between restarts, so to avoid data duplication

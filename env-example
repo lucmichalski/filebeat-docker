@@ -1,0 +1,17 @@
+###########################################################
+###################### General Setup ######################
+###########################################################
+
+### Paths #################################################
+NGINX_HOST_LOG_PATH=/data/wwwlogs
+LARAVEL_HOST_LOG_PATH=/data/laravel/
+PHP_HOST_LOG_PATH=/usr/local/php7/var/log/
+MYSQL_HOST_LOG_PATH=/data/mysql/
+SYSTEM_HOST_LOG_PATH=/var/log/
+
+###########################################################
+################ Containers Customization #################
+###########################################################
+
+### FILEBEAT #################################################
+FILEBEAT_PATH=./filebeat/filebeat.yml
