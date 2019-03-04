@@ -2,10 +2,10 @@ filebeat.inputs:
   - type: log
     enabled: true
     paths:
-      - /var/log/nginx/api.xxx.com_nginx.log # 文件名和目录名都可以用通配符，不过 path/*/*.log 不包括 path 根目录的文件
+      - /var/log/nginx/nginx.log # 文件名和目录名都可以用通配符，不过 path/*/*.log 不包括 path 根目录的文件
     fields: # 添加额外的字段
-      log_topic: "nginx-backend-xxx"
-      service: "backend-xxx"
+      log_topic: "nginx-test"
+      service: "backend-nginx"
     fields_under_root: true # field 字段会放在根索引下，否则会放在 fields 字段下
     ignore_older: 24h # 忽略 24 小时前的文件
     scan_frequency: 11s # 设置不同的时间，这样可以错开扫描高峰
@@ -20,7 +20,7 @@ filebeat.inputs:
     paths:
       - /var/log/laravel/agent.log
     fields:
-      log_topic: "php-backend-xxx"
+      log_topic: "php-test"
       service: "backend-api"
     fields_under_root: true
     ignore_older: 24h
@@ -31,22 +31,22 @@ filebeat.inputs:
     # close_timeout: 1h
     clean_inactive: 25h
     harvester_limit: 10
-  - type: log
-    enabled: true
-    paths:
-      - /var/log/nginx/*app.xxx.com_nginx.log
-    fields:
-      log_topic: "nginx-frontend-xxx"
-      service: "frontend-xxx"
-    fields_under_root: true
-    ignore_older: 24h
-    scan_frequency: 13s
-    max_backoff: 13s
-    backoff: 13s
-    harvester_buffer_size: 51200
-    #close_timeout: 1h
-    clean_inactive: 25h
-    harvester_limit: 10
+  # - type: log
+  #   enabled: true
+  #   paths:
+  #     - /var/log/send/send-worker-*.log
+  #   fields:
+  #     log_topic: "log-test"
+  #     service: "backend-send"
+  #   fields_under_root: true
+  #   ignore_older: 24h
+  #   scan_frequency: 13s
+  #   max_backoff: 13s
+  #   backoff: 13s
+  #   harvester_buffer_size: 51200
+  #   close_timeout: 1h
+  #   clean_inactive: 25h
+  #   harvester_limit: 10
   # - type: log
   #   enabled: true
   #   paths:
