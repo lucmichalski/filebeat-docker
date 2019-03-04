@@ -21,7 +21,7 @@ $git clone https://github.com/thinksvip/filebeat-docker.git
 ```
 4. 启动：
 ```
-    $ cd filebes
+    $ cd filebeat-docker
     $ cp env-example .env
     $ docker-compose up
 ```
