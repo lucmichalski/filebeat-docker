@@ -10,6 +10,8 @@ services:
         - /data/wwwlogs:/var/log/nginx/
         #Mount the php-fpm logs into the filebeat container so we can access and index them using the filebeat php-fpm module
         - /usr/local/php7/var/log/:/var/log/php-fpm/
+        #Mount the laravel logs into the filebeat container so we can access and and index them using the filebeat laravel module
+        - /data/laravel/:/var/log/laravel/
         #Mount the mysql logs into the filebeat container so we can access and and index them using the filebeat mysql module
         - /data/mysql/:/var/log/mysql/
         #Mount the hosts system log directory. This represents the logs of the VM hosting docker. Consumed by the filebeat system module.

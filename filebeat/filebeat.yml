@@ -1,17 +1,122 @@
-filebeat.prospectors:
-- input_type: log
-  paths:
-    - /var/log/nginx/*.log
-  tags: ["nginx-accesslog"]
-  document_type: nginxaccess
-#output.kafka:
-#   enabled: true
-#   hosts: ["192.168.31.163:9092"]
-# #  topic: logstash-%{[type]}
-#   topic: backstage_%{[type]}
-output:
-  logstash:
-    hosts: ["192.168.31.111:5000"]
-#    worker: 1
-#    loadbalance: true
-#    index: filebeat
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/nginx/api.xxx.com_nginx.log # 文件名和目录名都可以用通配符，不过 path/*/*.log 不包括 path 根目录的文件
+    fields: # 添加额外的字段
+      log_topic: "nginx-backend-xxx"
+      service: "backend-xxx"
+    fields_under_root: true # field 字段会放在根索引下，否则会放在 fields 字段下
+    ignore_older: 24h # 忽略 24 小时前的文件
+    scan_frequency: 11s # 设置不同的时间，这样可以错开扫描高峰
+    max_backoff: 11s
+    backoff: 11s
+    harvester_buffer_size: 51200 # 采集的 buffer 大小
+    # close_timeout: 1h # 因为我这里的文件是一个小时产生一个，所以直接设置采集器默认 1 小时关闭
+    clean_inactive: 25h # 需要大于 ignore_older + scan_frequency，有效地清理可以减小 registry 文件的大小和当中记录的文件条目数量
+    harvester_limit: 10 # 限制最多爬取个数，默认不限制，如果碰到文件数很多一开始会占用大量 cpu
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/laravel/agent.log
+    fields:
+      log_topic: "php-backend-xxx"
+      service: "backend-api"
+    fields_under_root: true
+    ignore_older: 24h
+    scan_frequency: 19s
+    max_backoff: 19s
+    backoff: 19s
+    harvester_buffer_size: 51200
+    # close_timeout: 1h
+    clean_inactive: 25h
+    harvester_limit: 10
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/nginx/*app.xxx.com_nginx.log
+    fields:
+      log_topic: "nginx-frontend-xxx"
+      service: "frontend-xxx"
+    fields_under_root: true
+    ignore_older: 24h
+    scan_frequency: 13s
+    max_backoff: 13s
+    backoff: 13s
+    harvester_buffer_size: 51200
+    #close_timeout: 1h
+    clean_inactive: 25h
+    harvester_limit: 10
+  # - type: log
+  #   enabled: true
+  #   paths:
+  #     - /var/log/sync/sync-worker-*.log
+  #   fields:
+  #     log_topic: "log-test"
+  #     service: "backend-sync"
+  #   fields_under_root: true
+  #   ignore_older: 24h
+  #   scan_frequency: 17s
+  #   max_backoff: 17s
+  #   backoff: 17s
+  #   harvester_buffer_size: 51200
+  #   close_timeout: 1h
+  #   clean_inactive: 25h
+  #   harvester_limit: 10
+  # - type: log
+  #   enabled: true
+  #   paths:
+  #     - /var/log/delete/delete-worker-*.log
+  #   fields:
+  #     log_topic: "log-test"
+  #     service: "backend-delete"
+  #   fields_under_root: true
+  #   ignore_older: 24h
+  #   scan_frequency: 71s
+  #   max_backoff: 71s
+  #   backoff: 71s
+  #   harvester_buffer_size: 51200
+  #   close_timeout: 1h
+  #   clean_inactive: 25h
+  #   harvester_limit: 10
+  # - type: log
+  #   enabled: true
+  #   paths:
+  #       - /var/log/php/error.log
+  #   fields:
+  #       log_topic: "log-im"
+  #       service: "backend-php-error"
+  #   fields_under_root: true
+  #   ignore_older: 24h
+  #   scan_frequency: 23s
+  #   max_backoff: 23s
+  #   backoff: 23s
+  #   clean_inactive: 25h
+  #   close_renamed: true # 因为这个日志文件会定期重命名并压缩，所以设置 close_renamed 可以关闭采集器
+  #   multiline.pattern: '^\[[0-9]{2}-[A-Z]{1}[a-z]{2}-[0-9]{4}' # 合并多行日志，将类似 [06-Sep-2018 ... 开头的日志向后合并
+  #   multiline.negate: true
+  #   multiline.match: after
+  #   harvester_limit: 10
+
+## Kafka Output 相关属性设置: https://www.elastic.co/guide/en/beats/filebeat/current/kafka-output.html
+output.kafka:
+  enabled: true
+  hosts: ["x.x.x.x:9092"]
+  topic: '%{[log_topic]}' ##匹配fileds字段下的logtopic
+  codec.format:
+    string: '%{[message]}' #'%{[beat][hostname]} %{[service]} %{[message]}' # 传给 logstash 时可以用 grok 过滤插件设置 `match => { "message" => "^%{DATA:hostname} %{DATA:service} (?<message>.*)"}` 解析
+    # 如果设成 ‘%{[message]}’，则是原样转发消息
+  partition.round_robin:
+    reachable_only: false
+  required_acks: 1
+  compression: none # 默认是 gzip，如果想节省开销可以设成 none
+  bulk_max_size: 100
+  max_message_bytes: 1000000 # 不要超过 kafka server 端设置的 message.max.size，否则超过的部分会被丢弃
+
+output.file:
+  enabled: false
+  path: /home/ubuntu/test-log
+  filename: output.log
+  permissions: 0644
+  codec.format:
+    string: '%{[message]}'
